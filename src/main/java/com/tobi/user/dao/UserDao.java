@@ -10,20 +10,30 @@ import javax.sql.DataSource;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.tobi.user.dto.User;
-import com.tobi.user.strategy.AddStatement;
-import com.tobi.user.strategy.DeleteAllStatement;
-import com.tobi.user.strategy.StatementStrategy;
 
 public class UserDao {
 	private DataSource dataSource;
+	private JdbcContext jdbcContext;
 
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
-	public void add(User user) throws SQLException {
-		StatementStrategy stmt = new AddStatement(user);
-		jdbcContextWithStatementStrategy(stmt);
+	public void setJdbcContext(JdbcContext jdbcContext) {
+		this.jdbcContext = jdbcContext;
+	}
+
+	public void add(final User user) throws SQLException {
+		this.jdbcContext.workWithStatementStrategy(
+			(Connection c) -> {
+				PreparedStatement ps = c.prepareStatement("insert into users(id, name, password) values (?, ?, ?)");
+				ps.setString(1, user.getId());
+				ps.setString(2, user.getName());
+				ps.setString(3, user.getPassword());
+
+				return ps;
+			}
+		);
 	}
 
 	public User get(String id) throws SQLException {
@@ -52,8 +62,13 @@ public class UserDao {
 	}
 
 	public void deleteAll() throws SQLException {
-		StatementStrategy st = new DeleteAllStatement();
-		jdbcContextWithStatementStrategy(st);
+		this.jdbcContext.workWithStatementStrategy(
+			(Connection c) -> {
+				PreparedStatement ps = c.prepareStatement("delete from users");
+
+				return ps;
+			}
+		);
 	}
 
 	public int getCount() throws SQLException {
@@ -69,14 +84,5 @@ public class UserDao {
 		c.close();
 
 		return count;
-	}
-
-	public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
-		try(Connection c = dataSource.getConnection();
-			PreparedStatement ps = stmt.makePreparedStatement(c)) {
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			throw e;
-		}
 	}
 }
