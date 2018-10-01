@@ -23,4 +23,17 @@ public class JdbcContext {
 			throw e;
 		}
 	}
+
+	public void executeSql(final String query, final Object... args) throws SQLException {
+		workWithStatementStrategy(
+			(Connection c) -> {
+				PreparedStatement ps = c.prepareStatement(query);
+				for (int i = 0; i < args.length; i++) {
+					ps.setObject(i + 1, args[i]);
+				}
+
+				return ps;
+			}
+		);
+	}
 }
