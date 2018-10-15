@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.tobi.config.DaoFactory;
 import com.tobi.user.dao.UserDao;
+import com.tobi.user.dto.Level;
 import com.tobi.user.dto.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -33,9 +34,9 @@ public class UserDaoTest {
 
 	@Before
 	public void setUp() {
-		this.user1 = new User("hwang", "황민식", "minsik123");
-		this.user2 = new User("moon", "문기선", "gisun123");
-		this.user3 = new User("kwon", "권혁내", "hyuknae123");
+		this.user1 = new User("hwang", "황민식", "minsik123", Level.BASIC, 1, 0);
+		this.user2 = new User("moon", "문기선", "gisun123", Level.SILVER, 55, 10);
+		this.user3 = new User("kwon", "권혁내", "hyuknae123", Level.GOLD, 100, 40);
 
 		System.out.println(this.dao);
 		System.out.println(this);
@@ -51,12 +52,10 @@ public class UserDaoTest {
 		assertThat(dao.getCount(), is(2));
 
 		User userget1 = dao.get(user1.getId());
-		assertThat(userget1.getName(), is(user1.getName()));
-		assertThat(userget1.getPassword(), is(user1.getPassword()));
+		checkSameUser(userget1, user1);
 
 		User userget2 = dao.get(user2.getId());
-		assertThat(userget2.getName(), is(user2.getName()));
-		assertThat(userget2.getPassword(), is(user2.getPassword()));
+		checkSameUser(userget2, user2);
 	}
 
 	@Test
@@ -110,5 +109,8 @@ public class UserDaoTest {
 		assertThat(user1.getId(), is(user2.getId()));
 		assertThat(user1.getName(), is(user2.getName()));
 		assertThat(user1.getPassword(), is(user2.getPassword()));
+		assertThat(user1.getLevel(), is(user2.getLevel()));
+		assertThat(user1.getLogin(), is(user2.getLogin()));
+		assertThat(user1.getRecommend(), is(user2.getRecommend()));
 	}
 }
