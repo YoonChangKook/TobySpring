@@ -3,23 +3,17 @@ package com.tobi.junit;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.tobi.config.DaoFactory;
-import com.tobi.user.dao.UserDao;
+import com.tobi.user.dao.UserDaoJdbc;
 import com.tobi.user.dto.Level;
 import com.tobi.user.dto.User;
 
@@ -27,7 +21,7 @@ import com.tobi.user.dto.User;
 @ContextConfiguration(locations = "/applicationContext.xml")
 public class UserDaoTest {
 	@Autowired
-	private UserDao dao;
+	private UserDaoJdbc dao;
 	private User user1;
 	private User user2;
 	private User user3;
@@ -112,5 +106,21 @@ public class UserDaoTest {
 		assertThat(user1.getLevel(), is(user2.getLevel()));
 		assertThat(user1.getLogin(), is(user2.getLogin()));
 		assertThat(user1.getRecommend(), is(user2.getRecommend()));
+	}
+
+	@Test
+	public void update() {
+		dao.deleteAll();
+		dao.add(user1);
+
+		user1.setName("김성현");
+		user1.setPassword("sunghyun123");
+		user1.setLevel(Level.GOLD);
+		user1.setLogin(1000);
+		user1.setRecommend(999);
+		dao.update(user1);
+
+		User user1update = dao.get(user1.getId());
+		checkSameUser(user1, user1update);
 	}
 }

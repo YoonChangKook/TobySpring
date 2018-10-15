@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
-import com.tobi.user.dao.UserDao;
+import com.tobi.user.dao.UserDaoJdbc;
 
 @Configuration
 public class DaoFactory {
@@ -23,8 +23,8 @@ public class DaoFactory {
 	}
 
 	@Bean
-	public UserDao userDao() {
-		UserDao userDao = new UserDao();
+	public UserDaoJdbc userDao() {
+		UserDaoJdbc userDao = new UserDaoJdbc();
 		userDao.setDataSource(dataSource());
 		return userDao;
 	}
