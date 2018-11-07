@@ -1,12 +1,14 @@
 package com.tobi.junit;
 
 import static com.tobi.user.service.UserService.*;
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
+
+import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,11 +25,33 @@ import com.tobi.user.service.UserService;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "/applicationContext.xml")
 public class UserServiceTest {
+	static class TestUserService extends UserService {
+		private String id;
+
+		private TestUserService(String id) {
+			this.id = id;
+		}
+
+		@Override
+		protected void upgradeLevel(User user) {
+			if (user.getId().equals(this.id)) {
+				throw new TestUserServiceException();
+			}
+
+			super.upgradeLevel(user);
+		}
+	}
+
+	static class TestUserServiceException extends RuntimeException {}
+
 	@Autowired
 	private UserService userService;
 
 	@Autowired
 	private UserDao userDao;
+
+	@Autowired
+	private DataSource dataSource;
 
 	private List<User> users;
 
@@ -48,7 +72,7 @@ public class UserServiceTest {
 	}
 
 	@Test
-	public void upgradeLevels() {
+	public void upgradeLevels() throws Exception {
 		userDao.deleteAll();
 		for(User user : users) {
 			userDao.add(user);
@@ -88,5 +112,24 @@ public class UserServiceTest {
 
 		assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel()));
 		assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
+	}
+
+	@Test
+	public void upgradeAllOrNothing() throws Exception {
+		UserService testUserService = new TestUserService(users.get(3).getId());
+		testUserService.setUserDao(this.userDao);
+		testUserService.setDataSource(this.dataSource);
+
+		this.userDao.deleteAll();
+		for (User user : users) {
+			this.userDao.add(user);
+		}
+
+		try {
+			testUserService.upgradeLevels();
+			fail("TestUserServiceException expected");
+		} catch (TestUserServiceException e) {}
+
+		checkLevelUpgraded(users.get(1), false);
 	}
 }
