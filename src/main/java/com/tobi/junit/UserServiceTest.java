@@ -1,5 +1,6 @@
 package com.tobi.junit;
 
+import static com.tobi.user.service.UserService.*;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -33,10 +34,10 @@ public class UserServiceTest {
 	@Before
 	public void setUp() {
 		this.users = Arrays.asList(
-			new User("yoonchang", "국윤창", "p1", Level.BASIC, 49, 0),
-			new User("hangyul", "김한결", "p2", Level.BASIC, 50, 0),
-			new User("sunghyun", "김성현", "p3", Level.SILVER, 60, 29),
-			new User("minsik", "황민식", "p4", Level.SILVER, 60, 30),
+			new User("yoonchang", "국윤창", "p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
+			new User("hangyul", "김한결", "p2", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
+			new User("sunghyun", "김성현", "p3", Level.SILVER, 60, MIN_RECCOMEND_FOR_GOLD - 1),
+			new User("minsik", "황민식", "p4", Level.SILVER, 60, MIN_RECCOMEND_FOR_GOLD),
 			new User("hyuknae", "권혁내", "p5", Level.GOLD, 100, 100)
 		);
 	}
@@ -55,16 +56,20 @@ public class UserServiceTest {
 
 		userService.upgradeLevels();
 
-		checkLevel(users.get(0), Level.BASIC);
-		checkLevel(users.get(1), Level.SILVER);
-		checkLevel(users.get(2), Level.SILVER);
-		checkLevel(users.get(3), Level.GOLD);
-		checkLevel(users.get(4), Level.GOLD);
+		checkLevelUpgraded(users.get(0), false);
+		checkLevelUpgraded(users.get(1), true);
+		checkLevelUpgraded(users.get(2), false);
+		checkLevelUpgraded(users.get(3), true);
+		checkLevelUpgraded(users.get(4), false);
 	}
 
-	private void checkLevel(User user, Level expectedLevel) {
-		User userUpdate = userDao.get(user.getId());
-		assertThat(userUpdate.getLevel(), is(expectedLevel));
+	private void checkLevelUpgraded(User user, boolean upgraded) {
+		User userUpgrade = userDao.get(user.getId());
+		if (upgraded) {
+			assertThat(userUpgrade.getLevel(), is(user.getLevel().nextLevel()));
+		} else {
+			assertThat(userUpgrade.getLevel(), is(user.getLevel()));
+		}
 	}
 
 	@Test
