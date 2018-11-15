@@ -4,6 +4,7 @@ import static com.tobi.user.service.UserServiceImpl.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,20 +12,18 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.tobi.user.dao.UserDao;
 import com.tobi.user.dto.Level;
 import com.tobi.user.dto.User;
-import com.tobi.user.service.UserService;
 import com.tobi.user.service.UserServiceImpl;
 import com.tobi.user.service.UserServiceTx;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "/applicationContext.xml")
+@RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
 	static class TestUserService extends UserServiceImpl {
 		private String id;
@@ -45,13 +44,13 @@ public class UserServiceTest {
 
 	static class TestUserServiceException extends RuntimeException {}
 
-	@Autowired
-	private UserService userService;
+	@InjectMocks
+	private UserServiceImpl userService;
 
-	@Autowired
+	@Mock
 	private UserDao userDao;
 
-	@Autowired
+	@Mock
 	private PlatformTransactionManager transactionManager;
 
 	private List<User> users;
@@ -68,24 +67,16 @@ public class UserServiceTest {
 	}
 
 	@Test
-	public void bean() {
-		assertThat(this.userService, is(notNullValue()));
-	}
-
-	@Test
-	public void upgradeLevels() throws Exception {
-		userDao.deleteAll();
-		for(User user : users) {
-			userDao.add(user);
-		}
+	public void upgradeLevels() {
+		when(userDao.getAll()).thenReturn(this.users);
 
 		userService.upgradeLevels();
 
-		checkLevelUpgraded(users.get(0), false);
-		checkLevelUpgraded(users.get(1), true);
-		checkLevelUpgraded(users.get(2), false);
-		checkLevelUpgraded(users.get(3), true);
-		checkLevelUpgraded(users.get(4), false);
+		verify(userDao, times(2)).update(any(User.class));
+		verify(userDao).update(users.get(1));
+		assertThat(users.get(1).getLevel(), is(Level.SILVER));
+		verify(userDao).update(users.get(3));
+		assertThat(users.get(3).getLevel(), is(Level.GOLD));
 	}
 
 	private void checkLevelUpgraded(User user, boolean upgraded) {
@@ -108,15 +99,13 @@ public class UserServiceTest {
 		userService.add(userWithLevel);
 		userService.add(userWithoutLevel);
 
-		User userWithLevelRead = userDao.get(userWithLevel.getId());
-		User userWithoutLevelRead = userDao.get(userWithoutLevel.getId());
-
-		assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel()));
-		assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
+		verify(userDao, times(2)).add(any(User.class));
 	}
 
 	@Test
-	public void upgradeAllOrNothing() throws Exception {
+	public void upgradeAllOrNothing() {
+		when(userDao.getAll()).thenReturn(this.users);
+
 		TestUserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao);
 
@@ -124,16 +113,11 @@ public class UserServiceTest {
 		txUserService.setTransactionManager(transactionManager);
 		txUserService.setUserService(testUserService);
 
-		this.userDao.deleteAll();
-		for (User user : users) {
-			this.userDao.add(user);
-		}
-
 		try {
 			txUserService.upgradeLevels();
 			fail("TestUserServiceException expected");
 		} catch (TestUserServiceException e) {}
 
-		checkLevelUpgraded(users.get(1), false);
+		verify(userDao, times(1)).update(any(User.class));
 	}
 }
