@@ -1,6 +1,6 @@
 package com.tobi.junit;
 
-import static com.tobi.user.service.UserService.*;
+import static com.tobi.user.service.UserServiceImpl.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.*;
@@ -20,11 +20,13 @@ import com.tobi.user.dao.UserDao;
 import com.tobi.user.dto.Level;
 import com.tobi.user.dto.User;
 import com.tobi.user.service.UserService;
+import com.tobi.user.service.UserServiceImpl;
+import com.tobi.user.service.UserServiceTx;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "/applicationContext.xml")
 public class UserServiceTest {
-	static class TestUserService extends UserService {
+	static class TestUserService extends UserServiceImpl {
 		private String id;
 
 		private TestUserService(String id) {
@@ -115,9 +117,12 @@ public class UserServiceTest {
 
 	@Test
 	public void upgradeAllOrNothing() throws Exception {
-		UserService testUserService = new TestUserService(users.get(3).getId());
+		TestUserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao);
-		testUserService.setTransactionManager(this.transactionManager);
+
+		UserServiceTx txUserService = new UserServiceTx();
+		txUserService.setTransactionManager(transactionManager);
+		txUserService.setUserService(testUserService);
 
 		this.userDao.deleteAll();
 		for (User user : users) {
@@ -125,7 +130,7 @@ public class UserServiceTest {
 		}
 
 		try {
-			testUserService.upgradeLevels();
+			txUserService.upgradeLevels();
 			fail("TestUserServiceException expected");
 		} catch (TestUserServiceException e) {}
 
