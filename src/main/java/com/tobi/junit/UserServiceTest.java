@@ -15,16 +15,22 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.tobi.user.dao.UserDao;
 import com.tobi.user.dto.Level;
 import com.tobi.user.dto.User;
-import com.tobi.user.service.TransactionHandler;
+import com.tobi.user.service.TxProxyFactoryBean;
 import com.tobi.user.service.UserService;
 import com.tobi.user.service.UserServiceImpl;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:applicationContext.xml")
 public class UserServiceTest {
 	static class TestUserService extends UserServiceImpl {
 		private String id;
@@ -45,19 +51,21 @@ public class UserServiceTest {
 
 	static class TestUserServiceException extends RuntimeException {}
 
-	@InjectMocks
+	@Autowired
+	private ApplicationContext context;
+
 	private UserServiceImpl userService;
 
-	@Mock
 	private UserDao userDao;
-
-	@Mock
-	private PlatformTransactionManager transactionManager;
 
 	private List<User> users;
 
 	@Before
 	public void setUp() {
+		this.userDao = mock(UserDao.class);
+		this.userService = new UserServiceImpl();
+		this.userService.setUserDao(this.userDao);
+
 		this.users = Arrays.asList(
 			new User("yoonchang", "국윤창", "p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
 			new User("hangyul", "김한결", "p2", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
@@ -80,15 +88,6 @@ public class UserServiceTest {
 		assertThat(users.get(3).getLevel(), is(Level.GOLD));
 	}
 
-	private void checkLevelUpgraded(User user, boolean upgraded) {
-		User userUpgrade = userDao.get(user.getId());
-		if (upgraded) {
-			assertThat(userUpgrade.getLevel(), is(user.getLevel().nextLevel()));
-		} else {
-			assertThat(userUpgrade.getLevel(), is(user.getLevel()));
-		}
-	}
-
 	@Test
 	public void add() {
 		userDao.deleteAll();
@@ -104,17 +103,16 @@ public class UserServiceTest {
 	}
 
 	@Test
-	public void upgradeAllOrNothing() {
+	@DirtiesContext
+	public void upgradeAllOrNothing() throws Exception {
 		when(userDao.getAll()).thenReturn(this.users);
 
 		TestUserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao);
 
-		TransactionHandler txHandler = new TransactionHandler();
-		txHandler.setTarget(testUserService);
-		txHandler.setTransactionManager(transactionManager);
-		txHandler.setPattern("upgradeLevels");
-		UserService txUserService = (UserService)Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { UserService.class }, txHandler);
+		TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);
+		txProxyFactoryBean.setTarget(testUserService);
+		UserService txUserService = (UserService)txProxyFactoryBean.getObject();
 
 		try {
 			txUserService.upgradeLevels();
