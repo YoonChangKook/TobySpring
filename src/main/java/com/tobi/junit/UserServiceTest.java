@@ -2,10 +2,10 @@ package com.tobi.junit;
 
 import static com.tobi.user.service.UserServiceImpl.*;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,8 +20,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import com.tobi.user.dao.UserDao;
 import com.tobi.user.dto.Level;
 import com.tobi.user.dto.User;
+import com.tobi.user.service.TransactionHandler;
+import com.tobi.user.service.UserService;
 import com.tobi.user.service.UserServiceImpl;
-import com.tobi.user.service.UserServiceTx;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
@@ -109,9 +110,11 @@ public class UserServiceTest {
 		TestUserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao);
 
-		UserServiceTx txUserService = new UserServiceTx();
-		txUserService.setTransactionManager(transactionManager);
-		txUserService.setUserService(testUserService);
+		TransactionHandler txHandler = new TransactionHandler();
+		txHandler.setTarget(testUserService);
+		txHandler.setTransactionManager(transactionManager);
+		txHandler.setPattern("upgradeLevels");
+		UserService txUserService = (UserService)Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { UserService.class }, txHandler);
 
 		try {
 			txUserService.upgradeLevels();
