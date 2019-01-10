@@ -1,4 +1,4 @@
-package com.tobi.user.service;
+package com.tobi.user.proxy;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;

@@ -1,4 +1,4 @@
-package com.tobi.user.service;
+package com.tobi.user.proxy;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;

@@ -2,20 +2,12 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-    <bean id="userService" class="org.springframework.aop.framework.ProxyFactoryBean">
-        <property name="target" ref="userServiceImpl"/>
-        <property name="interceptorNames">
-            <list>
-                <value>transactionAdvisor</value>
-            </list>
-        </property>
-    </bean>
-
-    <bean id="transactionAdvice" class="com.tobi.user.service.TransactionAdvice">
+    <bean id="transactionAdvice" class="com.tobi.user.proxy.TransactionAdvice">
         <property name="transactionManager" ref="transactionManager"/>
     </bean>
 
-    <bean id="transactionPointcut" class="org.springframework.aop.support.NameMatchMethodPointcut">
+    <bean id="transactionPointcut" class="com.tobi.user.proxy.NameMatchClassMethodPointcut">
+        <property name="mappedClassName" value="*ServiceImpl"/>
         <property name="mappedName" value="upgrade*"/>
     </bean>
 
@@ -24,9 +16,13 @@
         <property name="pointcut" ref="transactionPointcut"/>
     </bean>
 
-    <bean id="userServiceImpl" class="com.tobi.user.service.UserServiceImpl">
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+    <bean id="userService" class="com.tobi.user.service.UserServiceImpl">
         <property name="userDao" ref="userDao"/>
     </bean>
+
+    <bean id="testUserService" class="com.tobi.junit.UserServiceTest$TestUserServiceImpl" parent="userService"/>
 
     <bean id="userDao" class="com.tobi.user.dao.UserDaoJdbc">
         <property name="dataSource" ref="dataSource"/>
