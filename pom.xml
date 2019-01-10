@@ -58,6 +58,13 @@
             <artifactId>mockito-all</artifactId>
             <version>1.10.19</version>
         </dependency>
+
+        <!-- AspectJ Tools -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjtools</artifactId>
+            <version>1.8.9</version>
+        </dependency>
     </dependencies>
 
     <build>
