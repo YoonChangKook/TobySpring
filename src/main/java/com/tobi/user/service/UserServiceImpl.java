@@ -16,6 +16,10 @@ public class UserServiceImpl implements UserService {
 		this.userDao = userDao;
 	}
 
+	public List<User> getAll() {
+		return this.userDao.getAll();
+	}
+
 	public void upgradeLevels() {
 		List<User> users = userDao.getAll();
 		for (User user : users) {

@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -26,6 +27,15 @@ import com.tobi.user.service.UserServiceImpl;
 public class UserServiceTest {
 	static class TestUserServiceImpl extends UserServiceImpl {
 		private String id = "minsik";
+
+		@Override
+		public List<User> getAll() {
+			for (User user : super.getAll()) {
+				user.setId("1000");
+				super.add(user);
+			}
+			return null;
+		}
 
 		@Override
 		protected void upgradeLevel(User user) {
@@ -117,5 +127,10 @@ public class UserServiceTest {
 		} else {
 			assertThat(userUpgrade.getLevel(), is(user.getLevel()));
 		}
+	}
+
+	@Test(expected = TransientDataAccessResourceException.class)
+	public void readOnlyTransactionAttributeTest() {
+		testUserService.getAll();
 	}
 }
