@@ -16,6 +16,8 @@ public class UserServiceImpl implements UserService {
 		this.userDao = userDao;
 	}
 
+	public void propagationTest() {}
+
 	public List<User> getAll() {
 		return this.userDao.getAll();
 	}

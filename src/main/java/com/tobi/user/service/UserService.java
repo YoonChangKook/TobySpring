@@ -12,4 +12,5 @@ public interface UserService {
 	List<User> getAll();
 	void add(User user);
 	void upgradeLevels();
+	void propagationTest();
 }

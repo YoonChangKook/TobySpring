@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tobi.user.dao.UserDao;
 import com.tobi.user.dto.Level;
@@ -27,6 +29,12 @@ import com.tobi.user.service.UserServiceImpl;
 public class UserServiceTest {
 	static class TestUserServiceImpl extends UserServiceImpl {
 		private String id = "minsik";
+
+		@Transactional (propagation = Propagation.NEVER)
+		@Override
+		public void propagationTest() {
+			upgradeLevels();
+		}
 
 		@Override
 		public List<User> getAll() {
@@ -132,5 +140,20 @@ public class UserServiceTest {
 	@Test(expected = TransientDataAccessResourceException.class)
 	public void readOnlyTransactionAttributeTest() {
 		testUserService.getAll();
+	}
+
+	@Test
+	public void transactionProxyTest() {
+		userDao.deleteAll();
+		for(User user : users) {
+			userDao.add(user);
+		}
+
+		try {
+			this.testUserService.propagationTest();
+			fail("TestUserServiceException expected");
+		} catch (TestUserServiceException ex) {}
+
+		checkLevelUpgraded(users.get(1), true);
 	}
 }
