@@ -8,10 +8,17 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import com.tobi.database.sqlservice.SqlService;
 import com.tobi.user.dto.Level;
 import com.tobi.user.dto.User;
 
 public class UserDaoJdbc implements UserDao {
+	private SqlService sqlService;
+
+	public void setSqlService(SqlService sqlService) {
+		this.sqlService = sqlService;
+	}
+
 	private final RowMapper<User> userMapper = (ResultSet rs, int rowNum) -> {
 		User user = new User();
 		user.setId(rs.getString("id"));
