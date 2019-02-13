@@ -8,11 +8,16 @@
             http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
     <tx:annotation-driven/>
 
-    <bean id="sqlService" class="com.tobi.database.sqlservice.XmlSqlService">
-        <property name="sqlReader" ref="sqlService"/>
-        <property name="sqlRegistry" ref="sqlService"/>
+    <bean id="sqlService" class="com.tobi.database.sqlservice.BaseSqlService">
+        <property name="sqlReader" ref="sqlReader"/>
+        <property name="sqlRegistry" ref="sqlRegistry"/>
+    </bean>
+
+    <bean id="sqlReader" class="com.tobi.database.sqlservice.JaxbXmlSqlReader">
         <property name="sqlmapFile" value="sqlmap.xml"/>
     </bean>
+
+    <bean id="sqlRegistry" class="com.tobi.database.sqlservice.HashMapSqlRegistry"/>
 
     <bean id="userService" class="com.tobi.user.service.UserServiceImpl">
         <property name="userDao" ref="userDao"/>
