@@ -1,25 +1,30 @@
 package com.tobi.database.sqlservice;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.springframework.beans.factory.InitializingBean;
+
 import com.tobi.database.sqlservice.jaxb.SqlType;
 import com.tobi.database.sqlservice.jaxb.Sqlmap;
-import com.tobi.user.dao.UserDao;
 
-public class XmlSqlService implements SqlService, SqlRegistry, SqlReader {
+public class XmlSqlService implements SqlService, SqlRegistry, SqlReader, InitializingBean {
 	private SqlReader sqlReader;
 	private SqlRegistry sqlRegistry;
 	private Map<String, String> sqlMap;
 	private String sqlmapFile;
 
-	@PostConstruct
-	public void loadSql() {
+	public XmlSqlService() {
+		this.sqlMap = new HashMap<>();
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
 		this.sqlReader.read(this.sqlRegistry);
 	}
 
@@ -56,7 +61,7 @@ public class XmlSqlService implements SqlService, SqlRegistry, SqlReader {
 		try {
 			JAXBContext context = JAXBContext.newInstance(contextPath);
 			Unmarshaller unmarshaller = context.createUnmarshaller();
-			InputStream is = UserDao.class.getResourceAsStream(sqlmapFile);
+			InputStream is = getClass().getClassLoader().getResourceAsStream(sqlmapFile);
 			Sqlmap sqlmap = (Sqlmap)unmarshaller.unmarshal(is);
 			for (SqlType sql : sqlmap.getSql()) {
 				sqlRegistry.registerSql(sql.getKey(), sql.getValue());
