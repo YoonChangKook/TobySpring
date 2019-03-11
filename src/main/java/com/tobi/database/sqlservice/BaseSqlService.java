@@ -2,6 +2,9 @@ package com.tobi.database.sqlservice;
 
 import org.springframework.beans.factory.InitializingBean;
 
+import com.tobi.database.exception.SqlNotFoundException;
+import com.tobi.database.exception.SqlRetrievalFailureException;
+
 public class BaseSqlService implements SqlService, InitializingBean {
 	protected SqlReader sqlReader;
 	protected SqlRegistry sqlRegistry;

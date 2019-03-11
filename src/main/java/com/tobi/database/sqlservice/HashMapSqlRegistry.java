@@ -3,6 +3,8 @@ package com.tobi.database.sqlservice;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.tobi.database.exception.SqlNotFoundException;
+
 public class HashMapSqlRegistry implements SqlRegistry {
 	private Map<String, String> sqlMap;
 

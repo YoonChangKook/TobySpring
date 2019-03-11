@@ -10,6 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.Unmarshaller;
 
+import com.tobi.database.exception.SqlRetrievalFailureException;
 import com.tobi.database.sqlservice.jaxb.SqlType;
 import com.tobi.database.sqlservice.jaxb.Sqlmap;
 

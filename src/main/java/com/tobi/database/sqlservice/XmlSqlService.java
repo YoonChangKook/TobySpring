@@ -10,6 +10,8 @@ import javax.xml.bind.Unmarshaller;
 
 import org.springframework.beans.factory.InitializingBean;
 
+import com.tobi.database.exception.SqlNotFoundException;
+import com.tobi.database.exception.SqlRetrievalFailureException;
 import com.tobi.database.sqlservice.jaxb.SqlType;
 import com.tobi.database.sqlservice.jaxb.Sqlmap;
 

@@ -17,7 +17,7 @@
         <property name="sqlmapFile" value="sqlmap.xml"/>
     </bean>
 
-    <bean id="sqlRegistry" class="com.tobi.database.sqlservice.HashMapSqlRegistry"/>
+    <bean id="sqlRegistry" class="com.tobi.database.sqlservice.ConcurrentHashMapSqlRegistry"/>
 
     <bean id="userService" class="com.tobi.user.service.UserServiceImpl">
         <property name="userDao" ref="userDao"/>
