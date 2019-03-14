@@ -13,12 +13,13 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.tobi.config.TestApplicationContext;
 import com.tobi.user.dao.UserDaoJdbc;
 import com.tobi.user.dto.Level;
 import com.tobi.user.dto.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "/applicationContext.xml")
+@ContextConfiguration(classes = TestApplicationContext.class)
 public class UserDaoTest {
 	@Autowired
 	private UserDaoJdbc dao;

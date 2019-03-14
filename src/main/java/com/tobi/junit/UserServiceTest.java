@@ -18,6 +18,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tobi.config.TestApplicationContext;
 import com.tobi.user.dao.UserDao;
 import com.tobi.user.dto.Level;
 import com.tobi.user.dto.User;
@@ -25,9 +26,9 @@ import com.tobi.user.service.UserService;
 import com.tobi.user.service.UserServiceImpl;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:applicationContext.xml")
+@ContextConfiguration(classes = TestApplicationContext.class)
 public class UserServiceTest {
-	static class TestUserServiceImpl extends UserServiceImpl {
+	public static class TestUserServiceImpl extends UserServiceImpl {
 		private String id = "minsik";
 
 		@Transactional (propagation = Propagation.NEVER)

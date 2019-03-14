@@ -13,8 +13,10 @@ import static org.junit.Assert.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.tobi.config.JUnitContext;
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "/junit.xml")
+@ContextConfiguration(classes = JUnitContext.class)
 public class JUnitTest {
 	@Autowired
 	private ApplicationContext context;

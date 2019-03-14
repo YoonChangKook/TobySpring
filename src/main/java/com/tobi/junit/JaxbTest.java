@@ -16,12 +16,13 @@ import org.springframework.oxm.XmlMappingException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.tobi.config.OxmTestContext;
 import com.tobi.database.sqlservice.OxmSqlService;
 import com.tobi.database.sqlservice.jaxb.SqlType;
 import com.tobi.database.sqlservice.jaxb.Sqlmap;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "/oxmTestContext.xml")
+@ContextConfiguration(classes = OxmTestContext.class)
 public class JaxbTest {
 	@Autowired
 	private Unmarshaller unmarshaller;

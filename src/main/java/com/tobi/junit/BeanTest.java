@@ -5,17 +5,18 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import com.tobi.config.JUnitContext;
 import com.tobi.junit.obj.TestObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("/junit.xml")
+@ContextConfiguration(classes = JUnitContext.class)
 public class BeanTest {
 	@Autowired
 	private TestObject testBean1;
@@ -33,7 +34,7 @@ public class BeanTest {
 
 	@Test
 	public void sameTest() {
-		ApplicationContext context = new GenericXmlApplicationContext("/junit.xml");
+		ApplicationContext context = new AnnotationConfigApplicationContext(JUnitContext.class);
 		TestObject testBean1 = context.getBean("testBean1", TestObject.class);
 		assertThat(this.testBean1.getNum(), is(testBean1.getNum()));
 		TestObject testBean2 = context.getBean("testBean2", TestObject.class);
@@ -44,7 +45,7 @@ public class BeanTest {
 
 	@Test(expected = NoSuchBeanDefinitionException.class)
 	public void existTest() {
-		ApplicationContext context = new GenericXmlApplicationContext("/junit.xml");
+		ApplicationContext context = new AnnotationConfigApplicationContext(JUnitContext.class);
 		TestObject testBean4 = context.getBean("testBean4", TestObject.class);
 	}
 }
