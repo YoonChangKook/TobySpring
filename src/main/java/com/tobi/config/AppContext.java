@@ -1,8 +1,11 @@
 package com.tobi.config;
 
+import java.sql.Driver;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -20,21 +23,23 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Import(SqlServiceContext.class)
 @PropertySource("classpath:/database.properties")
 public class AppContext {
-	@Autowired
-	private Environment environment;
+	@Value("${db.driverClass}")
+	private Class<? extends Driver> driverClass;
+	@Value("${db.url}")
+	private String url;
+	@Value("${db.username}")
+	private String username;
+	@Value("${db.password}")
+	private String password;
 
 	@Bean
 	public DataSource dataSource() {
 		SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
 
-		try {
-			dataSource.setDriverClass((Class<? extends java.sql.Driver>)Class.forName(environment.getProperty("db.driverClass")));
-		} catch(ClassNotFoundException ex) {
-			throw new RuntimeException(ex);
-		}
-		dataSource.setUrl(environment.getProperty("db.url"));
-		dataSource.setUsername(environment.getProperty("db.username"));
-		dataSource.setPassword(environment.getProperty("db.password"));
+		dataSource.setDriverClass(this.driverClass);
+		dataSource.setUrl(this.url);
+		dataSource.setUsername(this.username);
+		dataSource.setPassword(this.password);
 
 		return dataSource;
 	}
