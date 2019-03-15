@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.oxm.XmlMappingException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -23,6 +24,7 @@ import com.tobi.database.sqlservice.jaxb.Sqlmap;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = OxmTestContext.class)
+@ActiveProfiles("test")
 public class JaxbTest {
 	@Autowired
 	private Unmarshaller unmarshaller;

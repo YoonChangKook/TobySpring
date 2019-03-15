@@ -10,16 +10,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.tobi.config.TestApplicationContext;
+import com.tobi.config.AppContext;
+import com.tobi.config.TestAppContext;
 import com.tobi.user.dao.UserDaoJdbc;
 import com.tobi.user.dto.Level;
 import com.tobi.user.dto.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = TestApplicationContext.class)
+@ContextConfiguration(classes = {AppContext.class, TestAppContext.class})
+@ActiveProfiles("test")
 public class UserDaoTest {
 	@Autowired
 	private UserDaoJdbc dao;

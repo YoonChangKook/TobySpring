@@ -2,10 +2,12 @@ package com.tobi.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import com.tobi.junit.obj.TestObject;
 
 @Configuration
+@Profile("test")
 public class JUnitContext {
 	@Bean
 	public TestObject testBean1() {

@@ -5,18 +5,24 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
 import com.tobi.database.sqlservice.SqlService;
 import com.tobi.user.dto.Level;
 import com.tobi.user.dto.User;
 
+@Repository
 public class UserDaoJdbc implements UserDao {
-	private SqlService sqlService;
+	private final SqlService sqlService;
+	private JdbcTemplate jdbcTemplate;
 
-	public void setSqlService(SqlService sqlService) {
+	@Autowired
+	public UserDaoJdbc(SqlService sqlService, DataSource dataSource) {
 		this.sqlService = sqlService;
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	private final RowMapper<User> userMapper = (ResultSet rs, int rowNum) -> {
@@ -29,7 +35,6 @@ public class UserDaoJdbc implements UserDao {
 		user.setRecommend(rs.getInt("recommend"));
 		return user;
 	};
-	private JdbcTemplate jdbcTemplate;
 
 	public void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
